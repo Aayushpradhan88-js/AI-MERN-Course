@@ -1,0 +1,8 @@
+coding backend wih expressjs 2
+xpress.js is a lightweight, flexible web application framework for Node.js that has become a standard choice for building server-side applications. It simplifies the process of creating APIs, web pages, and services by providing a clean routing system, middleware support, and minimal setup. As a framework, Express handles the basics of HTTP request and response management while letting developers focus on business logic instead of low-level networking details.
+
+One of Express’s greatest strengths is its middleware architecture. Middleware functions are small units of code that process requests and responses, and they can be chained together. This makes common tasks such as parsing JSON, handling cookies, logging requests, managing sessions, and enabling cross-origin resource sharing easy to implement. Developers can use built-in middleware or install third-party packages, which offers both flexibility and consistency.
+
+Routing is another key feature. Express routes associate HTTP methods and URL paths with functions that handle requests. This makes it simple to define endpoints like GET /users, POST /login, or PUT /products/:id. Route parameters, query strings, and nested routers all work seamlessly, so applications can be organized clearly and scaled without complexity. Express also supports route-level middleware, which helps enforce authorization or validation logic precisely where it is needed.
+
+Express is commonly used in web APIs and microservices. Because it is unopinionated, developers can build a RESTful API with any structure they choose. T

@@ -1,0 +1,23 @@
+{
+  "name": "hospital-management-system",
+  "version": "1.0.0",
+  "description": "Creating Hospital management system for authentication system and RBAC",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "aayush",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14",
+    "pg": "^8.21.0",
+    "pg-hstore": "^2.3.4",
+    "postgres": "^3.4.9",
+    "sequelize": "^6.37.8"
+  }
+}
