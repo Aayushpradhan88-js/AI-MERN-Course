@@ -32,6 +32,8 @@ export const loginUser = async (req, res) => {
         const { accessToken, refreshToken, user } = await loginService(req.body)
 
         //refresh token in cookie for security
+
+        
         // res.cookie('refreshToken', refreshToken, {
         //     httpOnly: true,
         //     sameSite: 'strict',
