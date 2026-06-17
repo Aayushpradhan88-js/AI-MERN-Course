@@ -8,7 +8,7 @@ const connectionDB = async () => {
 
         await sequelize.sync(
             {
-                force: true
+                force:  false
             }
         )
         console.log("Database synchronized successfully")

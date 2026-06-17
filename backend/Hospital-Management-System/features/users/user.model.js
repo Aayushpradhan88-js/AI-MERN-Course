@@ -27,6 +27,9 @@ const User = sequelize.define('User', {
         type: DataTypes.ENUM('admin', 'doctor', 'receptionist', 'patient'),
         defaultValue: 'patient'
     },
+    refreshToken: {
+        type: DataTypes.TEXT,
+    }
 }, {
     tableName: 'users',
     timestamps: true,
