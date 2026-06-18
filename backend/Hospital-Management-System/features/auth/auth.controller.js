@@ -32,13 +32,12 @@ export const loginUser = async (req, res) => {
         const { accessToken, refreshToken, user } = await loginService(req.body)
 
         //refresh token in cookie for security
-
-        
-        // res.cookie('refreshToken', refreshToken, {
-        //     httpOnly: true,
-        //     sameSite: 'strict',
-        //     maxAge: '7 * 24 * 60 * 60 * 1000' //7D
-        // })
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            // sameSite: 'strict', //CRSF Attack
+            // secure: process.env.NODE_ENV === 'production',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
 
         return res.status(200).json({
             success: true,

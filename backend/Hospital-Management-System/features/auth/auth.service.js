@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import User from '../users/user.model.js'
 
 
-export const registerService = async ({ name, email, password, role }) => {
+export const registerService = async ({ name, email, password, roles }) => {
     //step: 1 check email cha ki chainaaa
     //TODO: CHECK THE EMAIL (DB CALL)
 
@@ -15,7 +15,7 @@ export const registerService = async ({ name, email, password, role }) => {
         name,
         email,
         password: hashPassword,
-        role: role || 'patient'
+        roles: roles || 'patient'
     })
 
     //Token ko code lekhneee
@@ -30,10 +30,12 @@ export const registerService = async ({ name, email, password, role }) => {
     //     }
     // )
 
+    const userData = user.toJSON()
+    delete userData.password 
 
     return {
         // token,
-        user
+        user: userData
     }
 }
 
@@ -43,7 +45,9 @@ export const loginService = async ({ email, password }) => {
     console.log(email, password)
     //validate the email is already registered or not in DB
     const user = await User.findOne({
-        where: email
+        where: {
+            email
+        }
     })
     if (!user) {
         throw {
@@ -83,7 +87,9 @@ export const loginService = async ({ email, password }) => {
     )
 
     //password exclude
-    const { password: _, ...userData } = user.toJSON()
+    // const { password: _, ...userData } = user.toJSON()
+    const userData = user.toJSON()
+    delete userData.password  //password chai response ma na dinakao laai
 
     return {
         accessToken,
