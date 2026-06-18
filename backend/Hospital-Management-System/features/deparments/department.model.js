@@ -21,7 +21,7 @@ const Department = sequelize.define('Department', {
     defaultValue: true,
   },
 }, {
-  tableName: 'departments',
+  tableName: 'department',
   timestamps: true,
 });
 
