@@ -3,6 +3,7 @@ import User from "../features/users/user.model.js"
 import Appointment from "../features/appointments/appointment.model.js"
 import Doctor from "../features/doctor/doctor.model.js"
 import Patient from "../features/patient/patient.model.js"
+import Receptionist from "../features/receptionist/receptionist.model.js"
 import DoctorDepartment from "../features/doctorDepartment/doctorDepartment.model.js"
 import Department from "../features/deparments/department.model.js"
 
@@ -12,6 +13,9 @@ Doctor.belongsTo(User, { foreignKey: 'userId' });
 
 User.hasOne(Patient, { foreignKey: 'userId', onDelete: 'CASCADE' });
 Patient.belongsTo(User, { foreignKey: 'userId' });
+
+User.hasOne(Receptionist, { foreignKey: 'userId', onDelete: 'CASCADE' });
+Receptionist.belongsTo(User, { foreignKey: 'userId' });
 
 Doctor.belongsToMany(Department, {
     through: DoctorDepartment,
@@ -25,10 +29,10 @@ Department.belongsToMany(Doctor, {
 });
 
 // DoctorDepartment direct associations (for querying junction table directly)
-// DoctorDepartment.belongsTo(Doctor, { foreignKey: 'doctorId' });
-// DoctorDepartment.belongsTo(Department, { foreignKey: 'departmentId' });
-// Doctor.hasMany(DoctorDepartment, { foreignKey: 'doctorId' });
-// Department.hasMany(DoctorDepartment, { foreignKey: 'departmentId' });
+DoctorDepartment.belongsTo(Doctor, { foreignKey: 'doctorId' });
+DoctorDepartment.belongsTo(Department, { foreignKey: 'departmentId' });
+Doctor.hasMany(DoctorDepartment, { foreignKey: 'doctorId' });
+Department.hasMany(DoctorDepartment, { foreignKey: 'departmentId' });
 
 // ========== APPOINTMENT associations ==========
 // Patient -> Appointments
@@ -51,7 +55,7 @@ const connectionDB = async () => {
 
         await sequelize.sync(
             {
-                force: false
+                alter: true
             }
         )
         console.log("Database synchronized successfully")

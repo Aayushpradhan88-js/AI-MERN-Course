@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize'
 import sequelize from '../../config/connection.js'
 
-const Patient = sequelize.define('Patient', {
+const Receptionist = sequelize.define('Receptionist', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -15,15 +15,6 @@ const Patient = sequelize.define('Patient', {
       key: 'id',
     },
     onDelete: 'CASCADE',
-  },
-  doctorId: {
-    type: DataTypes.INTEGER,
-    // allowNull: true,   // assigned later via appointment, not required at registration
-    references: {
-      model: 'doctors',
-      key: 'id',
-    },
-    onDelete: 'SET NULL',
   },
   firstName: {
     type: DataTypes.STRING,
@@ -46,41 +37,21 @@ const Patient = sequelize.define('Patient', {
     allowNull: false,
     unique: true,
   },
-  dateOfBirth: {
-    type: DataTypes.DATEONLY,
-    allowNull: false,
-  },
   gender: {
     type: DataTypes.ENUM('male', 'female', 'other'),
     allowNull: false,
   },
-  bloodGroup: {
-    type: DataTypes.ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'),
-    allowNull: true,
-  },
   address: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
-  emergencyContactName: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  emergencyContactPhone: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  medicalHistory: {
     type: DataTypes.TEXT,
     allowNull: true,
   },
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
-  }
+  },
 }, {
-  tableName: 'patients',
+  tableName: 'receptionists',
   timestamps: true,
 });
 
-export default Patient
+export default Receptionist;

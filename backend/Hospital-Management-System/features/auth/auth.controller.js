@@ -7,7 +7,6 @@ import { loginService, registerService } from "./auth.service.js"
 
 //register user
 export const registerUser = async (req, res) => {
-    // const data = req.body;
     try {
         const { user } = await registerService(req.body)
 
@@ -19,9 +18,10 @@ export const registerUser = async (req, res) => {
             }
         })
     } catch (error) {
-        return res.status(500).json({
+        console.error("Error in registerUser:", error);
+        return res.status(error.status || 500).json({
             success: false,
-            message: "internal server error"
+            message: error.message || "internal server error"
         })
     }
 }
@@ -29,15 +29,7 @@ export const registerUser = async (req, res) => {
 //login user
 export const loginUser = async (req, res) => {
     try {
-        const { accessToken, refreshToken, user } = await loginService(req.body)
-
-        //refresh token in cookie for security
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            // sameSite: 'strict', //CRSF Attack
-            // secure: process.env.NODE_ENV === 'production',
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+        const { accessToken, user } = await loginService(req.body)
 
         return res.status(200).json({
             success: true,
@@ -48,9 +40,10 @@ export const loginUser = async (req, res) => {
             }
         })
     } catch (error) {
-        return res.status(500).json({
+        console.error("Error in loginUser:", error);
+        return res.status(error.status || 500).json({
             success: false,
-            message: "Internal server error"
+            message: error.message || "Internal server error"
         })
     }
 }

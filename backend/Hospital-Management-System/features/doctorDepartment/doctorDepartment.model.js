@@ -1,7 +1,5 @@
 import { DataTypes } from 'sequelize'
-import { sequelize } from '../../config/index.js'
-import Doctor from '../doctor/doctor.model.js';
-import Department from '../deparments/department.model.js';
+import sequelize from '../../config/connection.js'
 
 const DoctorDepartment = sequelize.define('DoctorDepartment', {
   id: {
@@ -13,7 +11,7 @@ const DoctorDepartment = sequelize.define('DoctorDepartment', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: Doctor,
+      model: 'doctors',
       key: 'id',
     },
     onDelete: 'CASCADE',
@@ -22,7 +20,7 @@ const DoctorDepartment = sequelize.define('DoctorDepartment', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: Department,
+      model: 'departments',
       key: 'id',
     },
     onDelete: 'CASCADE',

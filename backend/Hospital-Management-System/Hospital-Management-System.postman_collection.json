@@ -1,0 +1,288 @@
+{
+	"info": {
+		"_postman_id": "7f805a4d-c12e-4b2a-89cf-1e82cd8dbe91",
+		"name": "Hospital Management System API",
+		"description": "API collection for testing JWT Auth, Role-Based Access Control (RBAC), and Doctor Creation endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register Admin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@hospital.com\",\n  \"password\": \"adminpassword123\",\n  \"roles\": \"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.accessToken) {",
+									"    pm.collectionVariables.set(\"adminAccessToken\", jsonData.data.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@hospital.com\",\n  \"password\": \"adminpassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Patient",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Patient John\",\n  \"email\": \"patient.john@hospital.com\",\n  \"password\": \"patientpassword123\",\n  \"roles\": \"patient\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Patient",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data && jsonData.data.accessToken) {",
+									"    pm.collectionVariables.set(\"patientAccessToken\", jsonData.data.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"patient.john@hospital.com\",\n  \"password\": \"patientpassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Doctors",
+			"item": [
+				{
+					"name": "Create Doctor (As Admin - Success)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminAccessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Smith\",\n  \"email\": \"alice.smith@hospital.com\",\n  \"phone\": \"9876543210\",\n  \"password\": \"doctorpassword123\",\n  \"specialization\": \"Cardiology\",\n  \"qualification\": \"MD, MBBS\",\n  \"experienceYears\": 5,\n  \"licenseNumber\": \"NMC-12345\",\n  \"gender\": \"female\",\n  \"dateOfBirth\": \"1990-05-15\",\n  \"address\": \"Kathmandu, Nepal\",\n  \"availableDays\": [\"monday\", \"wednesday\", \"friday\"],\n  \"consultationFee\": 1500.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/doctors",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"doctors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Doctor (As Patient - Fails 403)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{patientAccessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Bob\",\n  \"lastName\": \"Jones\",\n  \"email\": \"bob.jones@hospital.com\",\n  \"phone\": \"9876543211\",\n  \"password\": \"doctorpassword123\",\n  \"specialization\": \"Pediatrics\",\n  \"qualification\": \"MD\",\n  \"experienceYears\": 8,\n  \"licenseNumber\": \"NMC-54321\",\n  \"gender\": \"male\",\n  \"dateOfBirth\": \"1985-08-20\",\n  \"address\": \"Lalitpur, Nepal\",\n  \"availableDays\": [\"tuesday\", \"thursday\"],\n  \"consultationFee\": 1200.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/doctors",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"doctors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Doctor (Invalid Input - Fails 400)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminAccessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"Smith\",\n  \"email\": \"invalid-email\",\n  \"phone\": \"9876543210\",\n  \"password\": \"123\",\n  \"specialization\": \"Cardiology\",\n  \"qualification\": \"MD\",\n  \"licenseNumber\": \"NMC-12345\",\n  \"gender\": \"invalid-gender\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/doctors",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"doctors"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5900",
+			"type": "string"
+		},
+		{
+			"key": "adminAccessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "patientAccessToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

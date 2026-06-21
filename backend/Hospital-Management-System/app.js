@@ -3,13 +3,19 @@ dotenv.config();
 import express from 'express';
 import { connectionDB } from './config/index.js';
 import authRouter from './features/auth/auth.routes.js';
+import doctorRouter from './features/doctor/doctor.route.js';
+import patientRouter from './features/patient/patient.route.js';
+
 const app = express();
 
 app.use(express.json());
 
 await connectionDB();
 
-app.use("/api/auth", authRouter)
+app.use("/api/auth", authRouter);
+app.use("/api/doctors", doctorRouter);
+app.use("/api/patient", patientRouter);
+
 
 // Test route
 app.get('/', (req, res) => {

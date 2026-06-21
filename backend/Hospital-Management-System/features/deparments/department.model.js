@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize'
-import { sequelize } from '../../config/index.js'
+import sequelize from '../../config/connection.js'
 
 const Department = sequelize.define('Department', {
   id: {

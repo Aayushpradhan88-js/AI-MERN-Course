@@ -4,96 +4,105 @@ import User from '../users/user.model.js'
 
 
 export const registerService = async ({ name, email, password, roles }) => {
-    //step: 1 check email cha ki chainaaa
-    //TODO: CHECK THE EMAIL (DB CALL)
+    if (!name || !email || !password) {
+        throw {
+            status: 400,
+            message: "Name, email, and password are required"
+        };
+    }
 
-    const genSalt = 10
-    const hashPassword = await bcrypt.hash(password, genSalt)
-    console.log(hashPassword)
+    // Step 1: Check if email is already registered
+    const existingUser = await User.findOne({
+        where: { email }
+    });
+
+    if (existingUser) {
+        throw {
+            status: 400,
+            message: "Email is already registered"
+        };
+    }
+
+    const genSalt = 10;
+    const hashPassword = await bcrypt.hash(password, genSalt);
 
     const user = await User.create({
         name,
         email,
         password: hashPassword,
         roles: roles || 'patient'
-    })
+    });
 
-    //Token ko code lekhneee
-    // const token = jwt.sign(
-    //     {
-    //         id: user.id,
-    //         role: user.role
-    //     },
-    //     process.env.JWT_SECRET, //secret key
-    //     {
-    //         expiresIn: process.env.JWT_EXPIRES_IN
-    //     }
-    // )
-
-    const userData = user.toJSON()
-    delete userData.password 
+    const userData = user.toJSON();
+    delete userData.password;
+    delete userData.refreshToken;
 
     return {
-        // token,
         user: userData
-    }
+    };
 }
 
 //loginService
-
 export const loginService = async ({ email, password }) => {
-    console.log(email, password)
-    //validate the email is already registered or not in DB
+    if (!email || !password) {
+        throw {
+            status: 400,
+            message: "Email and password are required"
+        };
+    }
+
+    // Validate if the email is registered
     const user = await User.findOne({
-        where: {
-            email
-        }
-    })
+        where: { email }
+    });
+
     if (!user) {
         throw {
-            status: 404,
-            message: "Please check youre email or password"
-        }
+            status: 401,
+            message: "Please check your email or password"
+        };
     }
-    console.log("user", user)
 
-    //password validate garnee
-    const isMatchPassword = await bcrypt.compare(password, user.password)
+    // Validate password
+    const isMatchPassword = await bcrypt.compare(password, user.password);
     if (!isMatchPassword) {
         throw {
-            status: 404,
-            message: "Please check youre email or password"
-        }
+            status: 401,
+            message: "Please check your email or password"
+        };
     }
 
-    //access-token & refresh token
-    //access-token 
-    const accessToken = jwt.sign(  //short lived token - 15min/10min
+    // Generate access token (using user.roles instead of undefined user.role)
+    const accessToken = jwt.sign(
         {
             id: user.id,
-            role: user.role
+            role: user.roles
         },
         process.env.JWT_ACCESS_SECRET,
         { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN }
-    )
+    );
 
-    //refresh-token
+    // Generate refresh token
     const refreshToken = jwt.sign(
         {
             id: user.id
         },
         process.env.JWT_REFRESH_SECRET,
         { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
-    )
+    );
 
-    //password exclude
-    // const { password: _, ...userData } = user.toJSON()
-    const userData = user.toJSON()
-    delete userData.password  //password chai response ma na dinakao laai
+    // Save refresh token to the database
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    // Prepare user response without password and refresh token
+    const userData = user.toJSON();
+    delete userData.password;
+    delete userData.refreshToken;
 
     return {
         accessToken,
         refreshToken,
         user: userData
-    }
+    };
 }
