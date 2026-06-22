@@ -15,11 +15,15 @@ const Appointment = sequelize.define('Appointment', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
+    departmentId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
     appointmentDate: {
         type: DataTypes.DATE,
         allowNull: false
     },
-    staus: {
+    status: {
         type: DataTypes.ENUM('pending', 'confirmed', 'completed', 'cancelled'),
         defaultValue: 'pending'
     },

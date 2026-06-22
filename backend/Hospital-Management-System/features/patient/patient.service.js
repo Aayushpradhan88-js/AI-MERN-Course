@@ -1,6 +1,5 @@
 import Patient from './patient.model.js';
 import User from '../users/user.model.js';
-import Doctor from '../doctor/doctor.model.js';
 import sequelize from '../../config/connection.js';
 import bcrypt from 'bcrypt';
 
@@ -61,13 +60,12 @@ const createPatientService = async (data, currentUser) => {
 
     const patient = await Patient.create({
       userId: currentUser.id,
-    //   doctorId,
       firstName,
       lastName,
       email: currentUser.email,
       phone,
       dateOfBirth,
-      gender,
+      gender: gender.toLowerCase(),
       bloodGroup: bloodGroup || null,
       address: address || null,
       emergencyContactName: emergencyContactName || null,
@@ -110,13 +108,12 @@ const createPatientService = async (data, currentUser) => {
 
     const patient = await Patient.create({
       userId: user.id,
-    //   doctorId,
       firstName,
       lastName,
       email,
       phone,
       dateOfBirth,
-      gender,
+      gender: gender.toLowerCase(),
       bloodGroup: bloodGroup || null,
       address: address || null,
       emergencyContactName: emergencyContactName || null,

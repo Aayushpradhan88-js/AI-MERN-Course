@@ -4,7 +4,8 @@
   "description": "Creating Hospital management system for authentication system and RBAC",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "seed:admin": "node scripts/seedAdmin.js"
   },
   "keywords": [],
   "author": "aayush",

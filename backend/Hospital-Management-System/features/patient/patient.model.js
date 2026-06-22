@@ -18,7 +18,7 @@ const Patient = sequelize.define('Patient', {
   },
   doctorId: {
     type: DataTypes.INTEGER,
-    // allowNull: true,   // assigned later via appointment, not required at registration
+    allowNull: true,
     references: {
       model: 'doctors',
       key: 'id',
