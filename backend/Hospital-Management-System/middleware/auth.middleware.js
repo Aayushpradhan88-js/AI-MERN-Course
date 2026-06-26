@@ -18,7 +18,8 @@ export const authenticate = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
     
     // Check if user still exists
-    const user = await User.findByPk(decoded.id);
+    const user = await User.findByPk(decoded.id); //db call
+    console.log("user", user)
     if (!user) {
       return res.status(401).json({
         success: false,
