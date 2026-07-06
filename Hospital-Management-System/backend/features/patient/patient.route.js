@@ -6,6 +6,6 @@ const patientRouter = express.Router();
 
 // patient role: fills their own profile
 // admin role: creates patient + user account from scratch
-patientRouter.post("/", authenticate, restrictTo('patient', 'admin'), createPatient);
+patientRouter.post("/", authenticate, restrictTo('patient'), createPatient);
 
 export default patientRouter;
