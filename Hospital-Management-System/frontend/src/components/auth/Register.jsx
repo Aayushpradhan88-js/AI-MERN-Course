@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import axios from 'axios'
 
 const roles = ['patient', 'doctor', 'receptionist']
 
@@ -16,10 +17,16 @@ const Register = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Register data:', formData)
-    // TODO: connect to backend
+    try {
+      const response = await axios.post('http://localhost:5900/api/auth/register', formData)
+      console.log('data', response.data)
+
+    } catch (error) {
+      console.log('register error', error)
+    }
+    
   }
 
   return (
@@ -42,7 +49,10 @@ const Register = () => {
         <h1 className="auth-title">Create an account</h1>
         <p className="auth-subtitle">Join us today — it&apos;s free</p>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form 
+        className="auth-form" 
+        onSubmit={handleSubmit}
+        >
           {/* Full Name */}
           <div className="auth-field">
             <label htmlFor="reg-name" className="auth-label">
