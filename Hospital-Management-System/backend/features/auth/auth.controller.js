@@ -29,14 +29,15 @@ export const registerUser = async (req, res) => {
 //login user
 export const loginUser = async (req, res) => {
     try {
-        const { accessToken, user } = await loginService(req.body)
+        const { accessToken, refreshToken, user } = await loginService(req.body)
 
         return res.status(200).json({
             success: true,
             message: "login successful",
             data: {
                 user,
-                accessToken
+                accessToken,
+                refreshToken
             }
         })
     } catch (error) {

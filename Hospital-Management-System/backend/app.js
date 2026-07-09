@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
+import cors from 'cors'
 import { connectionDB } from './config/index.js';
 import authRouter from './features/auth/auth.routes.js';
 import doctorRouter from './features/doctor/doctor.route.js';
@@ -19,6 +20,14 @@ const app = express();
 //     if (req.method === 'OPTIONS') return res.sendStatus(200);
 //     next();
 // });
+
+//cors setup
+// app.use(cors()) //sabaai request laai accept garneee
+
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credientals:true,
+}))
 
 app.use(express.json());
 

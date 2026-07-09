@@ -1,8 +1,15 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 const roles = ['patient', 'doctor', 'receptionist']
+
+//redirection
+const roleRedirects = {
+  patient: '/patient/overview',
+  doctor: '/doctor/overview',
+  receptionist: '/receptionist/overview'
+}
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -13,20 +20,29 @@ const Register = () => {
   })
   const [showPassword, setShowPassword] = useState(false)
 
+  const navigate = useNavigate()
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
     try {
-      const response = await axios.post('http://localhost:5900/api/auth/register', formData)
-      console.log('data', response.data)
+      const res = await axios.post('http://localhost:5900/api/auth/register', formData)
+      console.log(res.data)
+      console.log('data', res.data)
+      console.log('data', res?.data.data?.user)
+      console.log('data', res?.data.data.user.roles)
+      console.log('data', res.data.data.user.name)
+
+      // const redirectPath = roleRedirects[data.user.roles] || '/'
+      navigate(roleRedirects[res.data.data?.user?.roles] || '/')
 
     } catch (error) {
       console.log('register error', error)
     }
-    
   }
 
   return (
@@ -49,9 +65,9 @@ const Register = () => {
         <h1 className="auth-title">Create an account</h1>
         <p className="auth-subtitle">Join us today — it&apos;s free</p>
 
-        <form 
-        className="auth-form" 
-        onSubmit={handleSubmit}
+        <form
+          className="auth-form"
+          onSubmit={handleSubmit}
         >
           {/* Full Name */}
           <div className="auth-field">

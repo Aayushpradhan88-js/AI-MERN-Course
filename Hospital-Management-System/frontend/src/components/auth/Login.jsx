@@ -1,19 +1,56 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+
+// Role-based redirect map
+const roleRedirects = {
+  patient: '/patient/overview',
+  doctor: '/doctor/overview',
+  receptionist: '/receptionist/overview',
+}
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Login data:', formData)
-    // TODO: connect to backend
+    setError('')
+    setLoading(true)
+
+    try {
+      const res = await axios.post('http://localhost:5900/api/auth/login', formData)
+
+      const { accessToken, refreshToken, user } = res.data.data
+
+      console.log('Login success:', user)
+      console.log('accessToken:', accessToken)
+      console.log('refreshToken:', refreshToken)
+
+      // Save tokens to localStorage
+      localStorage.setItem('accessToken', accessToken)
+      localStorage.setItem('refreshToken', refreshToken)
+      localStorage.setItem('user', JSON.stringify(user))
+
+      // Redirect based on role
+      const redirectPath = roleRedirects[user.roles] || '/'
+      navigate(redirectPath)
+    } catch (err) {
+      console.error('Login error:', err)
+      const message =
+        err?.response?.data?.message || 'Login failed. Please try again.'
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -35,6 +72,12 @@ const Login = () => {
 
         <h1 className="auth-title">Welcome back</h1>
         <p className="auth-subtitle">Sign in to your account to continue</p>
+
+        {error && (
+          <div className="auth-error" style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>
+            {error}
+          </div>
+        )}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {/* Email */}
@@ -125,15 +168,17 @@ const Login = () => {
           </div>
 
           {/* Submit */}
-          <button type="submit" id="login-submit-btn" className="auth-btn">
-            <span>Sign In</span>
-            <svg viewBox="0 0 20 20" fill="currentColor" className="auth-btn-icon">
-              <path
-                fillRule="evenodd"
-                d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
+          <button type="submit" id="login-submit-btn" className="auth-btn" disabled={loading}>
+            <span>{loading ? 'Signing In...' : 'Sign In'}</span>
+            {!loading && (
+              <svg viewBox="0 0 20 20" fill="currentColor" className="auth-btn-icon">
+                <path
+                  fillRule="evenodd"
+                  d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
           </button>
         </form>
 
