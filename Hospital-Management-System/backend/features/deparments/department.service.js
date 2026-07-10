@@ -15,4 +15,9 @@ const createDepartmentService = async ({ name, description }) => {
   return department.toJSON();
 };
 
+export const getAllDepartments = async () => {
+  const departments = await Department.findAll({ where: { isActive: true } });
+  return departments;
+};
+
 export default createDepartmentService;

@@ -39,6 +39,7 @@ const Register = () => {
 
       // const redirectPath = roleRedirects[data.user.roles] || '/'
       navigate(roleRedirects[res.data.data?.user?.roles] || '/')
+      
 
     } catch (error) {
       console.log('register error', error)

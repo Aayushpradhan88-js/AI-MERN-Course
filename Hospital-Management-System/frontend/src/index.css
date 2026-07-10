@@ -740,3 +740,21 @@ body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #0a0b
 .activity-action { font-size: 0.875rem; color: #cbd5e1; margin: 0 0 0.2rem; }
 .activity-time { font-size: 0.75rem; color: #475569; margin: 0; }
 
+/* ---- Modal ---- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+}

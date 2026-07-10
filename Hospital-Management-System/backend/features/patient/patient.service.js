@@ -1,10 +1,11 @@
 import Patient from './patient.model.js';
 import User from '../users/user.model.js';
+import Doctor from '../doctor/doctor.model.js';
 import sequelize from '../../config/connection.js';
 import bcrypt from 'bcrypt';
 
 // Create patient
-const createPatientService = async (data, currentUser) => {
+export const createPatientService = async (data, currentUser) => {
   const {
     firstName,
     lastName,
@@ -128,6 +129,60 @@ const createPatientService = async (data, currentUser) => {
     await transaction.rollback();
     throw error;
   }
+}
+
+export const getPatientsService = async () => {
+  const patients = await Patient.findAll({
+    include: [
+      {
+        model: Doctor,
+        as: 'doctor', // Assuming association exists, otherwise we'll handle manually or add association later. Wait, does association exist?
+        // Actually, let's just fetch Patient and Doctor data will be joined if relations are setup, but to be safe we can just return patients.
+      }
+    ],
+    order: [['createdAt', 'DESC']]
+  });
+  return patients;
 };
 
-export default createPatientService;
+// If associations are not setup, let's just fetch Patient and we can manually resolve or just return patient.
+// Let's rewrite getPatientsService to not use include if it breaks. Let's just fetch Patient.
+
+export const getPatients = async () => {
+  const patients = await Patient.findAll({
+    order: [['createdAt', 'DESC']]
+  });
+  
+  // Fetch doctors manually to avoid association errors if not defined
+  const doctors = await Doctor.findAll();
+  
+  const patientsWithDoctor = patients.map(p => {
+    const patientJson = p.toJSON();
+    if (patientJson.doctorId) {
+      const doc = doctors.find(d => d.id === patientJson.doctorId);
+      if (doc) {
+        patientJson.doctorDetails = doc.toJSON();
+      }
+    }
+    return patientJson;
+  });
+
+  return patientsWithDoctor;
+};
+
+export const assignDoctorService = async (patientId, doctorId) => {
+  const patient = await Patient.findByPk(patientId);
+  if (!patient) {
+    throw { status: 404, message: 'Patient not found' };
+  }
+
+  const doctor = await Doctor.findByPk(doctorId);
+  if (!doctor) {
+    throw { status: 404, message: 'Doctor not found' };
+  }
+
+  patient.doctorId = doctorId;
+  await patient.save();
+
+  return patient.toJSON();
+}

@@ -1,4 +1,4 @@
-import createDepartmentService from './department.service.js';
+import createDepartmentService, { getAllDepartments } from './department.service.js';
 
 const createDepartment = async (req, res) => {
   try {
@@ -30,6 +30,22 @@ const createDepartment = async (req, res) => {
     return res.status(error.status || 500).json({
       success: false,
       message: error.message || 'Internal server error',
+    });
+  }
+};
+
+export const getDepartmentsController = async (req, res) => {
+  try {
+    const departments = await getAllDepartments();
+    return res.status(200).json({
+      success: true,
+      data: { departments },
+    });
+  } catch (error) {
+    console.error('Error in getDepartmentsController:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
     });
   }
 };

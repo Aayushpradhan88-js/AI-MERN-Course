@@ -1,4 +1,4 @@
-import createAppointmentService from './appointment.service.js';
+import createAppointmentService, { getAppointmentsService, updateAppointmentStatusService } from './appointment.service.js';
 
 const createAppointment = async (req, res) => {
   try {
@@ -59,6 +59,49 @@ const createAppointment = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in createAppointment controller:', error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Internal server error',
+    });
+  }
+};
+
+export const getAppointmentsController = async (req, res) => {
+  try {
+    const appointments = await getAppointmentsService(req.user);
+    return res.status(200).json({
+      success: true,
+      data: { appointments },
+    });
+  } catch (error) {
+    console.error('Error in getAppointmentsController:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};
+
+export const updateStatusController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status is required',
+      });
+    }
+
+    const updated = await updateAppointmentStatusService(id, status);
+    return res.status(200).json({
+      success: true,
+      message: 'Appointment status updated',
+      data: { appointment: updated },
+    });
+  } catch (error) {
+    console.error('Error in updateStatusController:', error);
     return res.status(error.status || 500).json({
       success: false,
       message: error.message || 'Internal server error',

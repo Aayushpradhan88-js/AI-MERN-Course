@@ -1,20 +1,56 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Sidebar from '../../components/Sidebar'
-
-const initialPatients = [
-  { name: 'Alice Johnson', age: 34, issue: 'Chest pain', doctor: 'Dr. Sarah Lee', status: 'Waiting' },
-  { name: 'Bob Martin', age: 52, issue: 'Shortness of breath', doctor: 'Unassigned', status: 'Waiting' },
-  { name: 'Carol White', age: 28, issue: 'ECG review', doctor: 'Dr. Emily Chen', status: 'In Progress' },
-  { name: 'David Brown', age: 61, issue: 'Post-surgery consult', doctor: 'Dr. James Patel', status: 'In Progress' },
-  { name: 'Eva Green', age: 45, issue: 'Hypertension', doctor: 'Unassigned', status: 'Waiting' },
-  { name: 'Frank Lee', age: 38, issue: 'Back pain', doctor: 'Dr. Alan Wang', status: 'Done' },
-]
+import axios from 'axios'
 
 const IncomingPatients = () => {
-  const [patients] = useState(initialPatients)
+  const [appointments, setAppointments] = useState([])
+  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('All')
 
-  const filtered = filter === 'All' ? patients : patients.filter((p) => p.status === filter)
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem('accessToken')
+      const res = await axios.get('http://localhost:5900/api/appointments', { 
+        headers: { Authorization: `Bearer ${token}` } 
+      })
+      
+      const fetchedAppointments = res.data.data.appointments.map(a => ({
+        id: a.id,
+        patientName: a.patientDetails ? `${a.patientDetails.firstName} ${a.patientDetails.lastName}` : 'Unknown',
+        date: new Date(a.appointmentDate).toLocaleDateString(),
+        time: new Date(a.appointmentDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        doctor: a.doctorDetails ? `Dr. ${a.doctorDetails.lastName}` : 'Unknown',
+        status: a.status
+      }))
+      
+      setAppointments(fetchedAppointments)
+      setLoading(false)
+    } catch (error) {
+      console.error(error)
+      setLoading(false)
+    }
+  }
+
+  const handleUpdateStatus = async (appointmentId, newStatus) => {
+    if (!newStatus) return
+    try {
+      const token = localStorage.getItem('accessToken')
+      await axios.put(`http://localhost:5900/api/appointments/${appointmentId}/status`, 
+        { status: newStatus }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      fetchData() // Refresh list
+    } catch (error) {
+      console.error(error)
+      alert('Error updating status')
+    }
+  }
+
+  const filtered = filter === 'All' ? appointments : appointments.filter((a) => a.status === filter)
 
   return (
     <div className="dash-layout">
@@ -30,7 +66,7 @@ const IncomingPatients = () => {
 
         {/* Filter tabs */}
         <div className="filter-tabs">
-          {['All', 'Waiting', 'In Progress', 'Done'].map((tab) => (
+          {['All', 'pending', 'confirmed', 'completed', 'cancelled'].map((tab) => (
             <button
               key={tab}
               className={`filter-tab ${filter === tab ? 'filter-tab--active' : ''}`}
@@ -48,37 +84,49 @@ const IncomingPatients = () => {
               <thead>
                 <tr>
                   <th>Patient</th>
-                  <th>Age</th>
-                  <th>Issue</th>
-                  <th>Assigned Doctor</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Doctor</th>
                   <th>Status</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((row, i) => (
+                {loading ? (
+                  <tr><td colSpan="6" style={{ textAlign: 'center' }}>Loading...</td></tr>
+                ) : filtered.map((row, i) => (
                   <tr key={i}>
-                    <td>{row.name}</td>
-                    <td className="td-muted">{row.age}</td>
-                    <td className="td-muted">{row.issue}</td>
-                    <td className={row.doctor === 'Unassigned' ? 'td-unassigned' : ''}>{row.doctor}</td>
+                    <td>{row.patientName}</td>
+                    <td className="td-muted">{row.date}</td>
+                    <td className="td-muted">{row.time}</td>
+                    <td>{row.doctor}</td>
                     <td>
                       <span
                         className={`status-badge ${
-                          row.status === 'Done'
+                          row.status === 'completed'
                             ? 'status-green'
-                            : row.status === 'In Progress'
+                            : row.status === 'confirmed'
                             ? 'status-purple'
-                            : 'status-yellow'
+                            : row.status === 'pending'
+                            ? 'status-yellow'
+                            : 'status-grey'
                         }`}
                       >
                         {row.status}
                       </span>
                     </td>
                     <td>
-                      {row.doctor === 'Unassigned' && (
-                        <button className="dash-btn dash-btn--sm">Assign</button>
-                      )}
+                      <select 
+                        value={row.status}
+                        onChange={(e) => handleUpdateStatus(row.id, e.target.value)}
+                        className="auth-input" 
+                        style={{ padding: '0.35rem', background: '#13131f', color: '#fff', border: '1px solid #333' }}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
                     </td>
                   </tr>
                 ))}

@@ -1,4 +1,4 @@
-import createPatientService from './patient.service.js';
+import { getPatients, assignDoctorService, createPatientService } from './patient.service.js';
 
 // POST /api/patient
 const createPatient = async (req, res) => {
@@ -107,6 +107,50 @@ const createPatient = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in createPatient controller:", error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Internal server error"
+    });
+  }
+};
+
+export const getPatientsController = async (req, res) => {
+  try {
+    const patients = await getPatients();
+    return res.status(200).json({
+      success: true,
+      data: { patients }
+    });
+  } catch (error) {
+    console.error("Error in getPatientsController:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
+
+export const assignDoctorController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { doctorId } = req.body;
+    
+    if (!doctorId) {
+      return res.status(400).json({
+        success: false,
+        message: "doctorId is required"
+      });
+    }
+
+    const updatedPatient = await assignDoctorService(id, doctorId);
+    
+    return res.status(200).json({
+      success: true,
+      message: "Doctor assigned successfully",
+      data: { patient: updatedPatient }
+    });
+  } catch (error) {
+    console.error("Error in assignDoctorController:", error);
     return res.status(error.status || 500).json({
       success: false,
       message: error.message || "Internal server error"
