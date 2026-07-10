@@ -16,7 +16,7 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
-    role: '',
+    roles: '',
   })
   const [showPassword, setShowPassword] = useState(false)
 
@@ -191,9 +191,9 @@ const Register = () => {
               </span>
               <select
                 id="reg-role"
-                name="role"
+                name="roles"
                 required
-                value={formData.role}
+                value={formData.roles}
                 onChange={handleChange}
                 className="auth-input auth-select"
               >
