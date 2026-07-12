@@ -5,6 +5,7 @@ import createDepartment, { getDepartmentsController } from './department.control
 const departmentRouter = express.Router();
 
 departmentRouter.post('/', authenticate, restrictTo('admin'), createDepartment);
-departmentRouter.get('/', authenticate, getDepartmentsController);
+departmentRouter.get('/', getDepartmentsController);
+// departmentRouter.get('/', getAllDepartments)
 
 export default departmentRouter;

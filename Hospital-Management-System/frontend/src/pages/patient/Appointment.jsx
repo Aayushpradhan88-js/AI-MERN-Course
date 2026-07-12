@@ -24,14 +24,12 @@ const PatientAppointment = () => {
   }, [])
 
   const fetchData = async () => {
+    const token = localStorage.getItem('accessToken')
+    const headers = { Authorization: `Bearer ${token}` }
+
+    // Fetch each independently so one failure doesn't block the others
     try {
-      const token = localStorage.getItem('accessToken')
-      const [appRes, depRes, docRes] = await Promise.all([
-        axios.get('http://localhost:5900/api/appointments', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5900/api/departments', { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get('http://localhost:5900/api/doctors', { headers: { Authorization: `Bearer ${token}` } })
-      ])
-      
+      const appRes = await axios.get('http://localhost:5900/api/appointments', { headers })
       const mappedApps = appRes.data.data.appointments.map(a => ({
         id: a.id,
         doctor: a.doctorDetails ? `Dr. ${a.doctorDetails.lastName}` : 'Unknown',
@@ -40,15 +38,26 @@ const PatientAppointment = () => {
         time: new Date(a.appointmentDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
         status: a.status
       }))
-      
       setAppointments(mappedApps)
-      setDepartments(depRes.data.data.departments)
-      setDoctors(docRes.data)
-      setLoading(false)
     } catch (error) {
-      console.error(error)
-      setLoading(false)
+      console.error('Error fetching appointments:', error)
     }
+
+    try {
+      const depRes = await axios.get('http://localhost:5900/api/departments')
+      setDepartments(depRes.data.data.departments)
+    } catch (error) {
+      console.error('Error fetching departments:', error)
+    }
+
+    try {
+      const docRes = await axios.get('http://localhost:5900/api/doctors', { headers })
+      setDoctors(docRes.data)
+    } catch (error) {
+      console.error('Error fetching doctors:', error)
+    }
+
+    setLoading(false)
   }
 
   const filtered = filter === 'All' ? appointments : appointments.filter((a) => a.status === filter)
@@ -79,6 +88,11 @@ const PatientAppointment = () => {
       alert(error.response?.data?.message || 'Error creating appointment')
     }
   }
+
+  const selectedDep = departments.find(d => d.id === Number(formData.departmentId));
+  const availableDoctors = selectedDep 
+    ? doctors.filter(doc => doc.specialization && doc.specialization.toLowerCase() === selectedDep.name.toLowerCase())
+    : doctors;
 
   return (
     <div className="dash-layout">
@@ -175,8 +189,8 @@ const PatientAppointment = () => {
                   Doctor:
                   <select name="doctorId" value={formData.doctorId} onChange={handleChange} required style={inputStyle}>
                     <option value="">Select Doctor...</option>
-                    {doctors.map(doc => (
-                      <option key={doc.id} value={doc.id}>Dr. {doc.lastName}</option>
+                    {availableDoctors.map(doc => (
+                      <option key={doc.id} value={doc.id}>Dr. {doc.firstName} {doc.lastName}</option>
                     ))}
                   </select>
                 </label>

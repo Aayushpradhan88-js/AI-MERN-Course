@@ -1,20 +1,109 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Sidebar from '../../components/Sidebar'
-
-const initialRequests = [
-  { patient: 'Alice Johnson', age: 34, reason: 'Chest pain follow-up', date: 'Jul 8, 2026', status: 'Pending' },
-  { patient: 'Bob Martin', age: 52, reason: 'Shortness of breath', date: 'Jul 8, 2026', status: 'Pending' },
-  { patient: 'Carol White', age: 28, reason: 'ECG review', date: 'Jul 9, 2026', status: 'Pending' },
-  { patient: 'David Brown', age: 61, reason: 'Post-surgery consult', date: 'Jul 9, 2026', status: 'Pending' },
-  { patient: 'Eva Green', age: 45, reason: 'Hypertension follow-up', date: 'Jul 10, 2026', status: 'Pending' },
-]
+import axios from 'axios'
 
 const PatientRequests = () => {
-  const [requests, setRequests] = useState(initialRequests)
+  const [requests, setRequests] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [doctorStatus, setDoctorStatus] = useState('loading') // loading | active | blocked
 
-  const handleAction = (index, action) => {
-    setRequests((prev) =>
-      prev.map((r, i) => (i === index ? { ...r, status: action } : r))
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const initials = user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'D'
+
+  useEffect(() => {
+    checkProfileAndFetch()
+  }, [])
+
+  const checkProfileAndFetch = async () => {
+    try {
+      const token = localStorage.getItem('accessToken')
+
+      // First check doctor's profile status
+      const profileRes = await axios.get('http://localhost:5900/api/doctors/my-profile', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      
+      const doctor = profileRes.data.data.doctor
+      if (doctor.status !== 'active') {
+        setDoctorStatus('blocked')
+        setLoading(false)
+        return
+      }
+
+      setDoctorStatus('active')
+
+      // Fetch appointments
+      const res = await axios.get('http://localhost:5900/api/appointments', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      const appointments = res.data.data.appointments
+      const mapped = appointments.map(a => ({
+        id: a.id,
+        patient: a.patientDetails
+          ? `${a.patientDetails.firstName} ${a.patientDetails.lastName}`
+          : 'Unknown Patient',
+        date: new Date(a.appointmentDate).toLocaleDateString(),
+        time: new Date(a.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        department: a.departmentDetails ? a.departmentDetails.name : 'General',
+        status: a.status
+      }))
+
+      setRequests(mapped)
+      setLoading(false)
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setDoctorStatus('blocked')
+      } else {
+        console.error('Error:', err)
+      }
+      setLoading(false)
+    }
+  }
+
+  const handleAction = async (id, action) => {
+    try {
+      const token = localStorage.getItem('accessToken')
+      const status = action === 'accept' ? 'confirmed' : 'cancelled'
+
+      await axios.put(`http://localhost:5900/api/appointments/${id}/status`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+
+      checkProfileAndFetch()
+    } catch (error) {
+      console.error('Error updating request:', error)
+      alert('Failed to update request')
+    }
+  }
+
+  // ─── BLOCKED STATE ───
+  if (doctorStatus === 'blocked') {
+    return (
+      <div className="dash-layout">
+        <Sidebar role="doctor" />
+        <main className="dash-main">
+          <div className="dash-header">
+            <div>
+              <h1 className="dash-title">Patient Requests</h1>
+              <p className="dash-subtitle">Review and respond to incoming requests</p>
+            </div>
+            <div className="dash-avatar" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>{initials}</div>
+          </div>
+
+          <div className="blocked-banner">
+            <div className="blocked-banner-icon">🔒</div>
+            <div className="blocked-banner-content">
+              <h2 className="blocked-banner-title">Access Restricted</h2>
+              <p className="blocked-banner-text">
+                You cannot manage patient requests until your profile has been approved by the admin.
+                Please check your <a href="/doctor/overview" className="blocked-banner-link">Overview</a> page for your profile status.
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
     )
   }
 
@@ -27,7 +116,7 @@ const PatientRequests = () => {
             <h1 className="dash-title">Patient Requests</h1>
             <p className="dash-subtitle">Review and respond to incoming requests</p>
           </div>
-          <div className="dash-avatar" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>S</div>
+          <div className="dash-avatar" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>{initials}</div>
         </div>
 
         <div className="dash-section">
@@ -36,27 +125,33 @@ const PatientRequests = () => {
               <thead>
                 <tr>
                   <th>Patient</th>
-                  <th>Age</th>
-                  <th>Reason</th>
                   <th>Date</th>
+                  <th>Time</th>
+                  <th>Department</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {requests.map((row, i) => (
-                  <tr key={i}>
+                {loading ? (
+                  <tr><td colSpan="6" style={{ textAlign: 'center' }}>Loading...</td></tr>
+                ) : requests.length === 0 ? (
+                  <tr><td colSpan="6" style={{ textAlign: 'center', color: '#64748b' }}>No appointment requests found</td></tr>
+                ) : requests.map((row) => (
+                  <tr key={row.id}>
                     <td>{row.patient}</td>
-                    <td className="td-muted">{row.age}</td>
-                    <td className="td-muted">{row.reason}</td>
                     <td>{row.date}</td>
+                    <td className="td-muted">{row.time}</td>
+                    <td>{row.department}</td>
                     <td>
                       <span
                         className={`status-badge ${
-                          row.status === 'Accepted'
+                          row.status === 'confirmed'
                             ? 'status-green'
-                            : row.status === 'Rejected'
+                            : row.status === 'cancelled'
                             ? 'status-red'
+                            : row.status === 'completed'
+                            ? 'status-purple'
                             : 'status-yellow'
                         }`}
                       >
@@ -64,17 +159,17 @@ const PatientRequests = () => {
                       </span>
                     </td>
                     <td>
-                      {row.status === 'Pending' ? (
+                      {row.status === 'pending' ? (
                         <div className="action-btns">
                           <button
                             className="dash-btn dash-btn--sm dash-btn--accept"
-                            onClick={() => handleAction(i, 'Accepted')}
+                            onClick={() => handleAction(row.id, 'accept')}
                           >
                             Accept
                           </button>
                           <button
                             className="dash-btn dash-btn--sm dash-btn--danger"
-                            onClick={() => handleAction(i, 'Rejected')}
+                            onClick={() => handleAction(row.id, 'reject')}
                           >
                             Reject
                           </button>

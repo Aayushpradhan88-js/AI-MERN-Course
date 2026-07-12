@@ -758,3 +758,274 @@ body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #0a0b
   max-height: 90vh;
   overflow-y: auto;
 }
+
+/* =============================================
+   DOCTOR PROFILE FORM
+   ============================================= */
+
+.doctor-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.doctor-form-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #818cf8;
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.doctor-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 640px) {
+  .doctor-form-grid { grid-template-columns: 1fr; }
+}
+
+.doctor-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.doctor-form-field--full {
+  grid-column: 1 / -1;
+}
+
+.doctor-form-label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.doctor-form-input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  box-sizing: border-box;
+}
+
+.doctor-form-input::placeholder {
+  color: #374151;
+}
+
+.doctor-form-input:focus {
+  border-color: rgba(99,88,252,0.6);
+  background: rgba(99,88,252,0.06);
+  box-shadow: 0 0 0 3px rgba(99,88,252,0.12);
+}
+
+.doctor-form-input--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255,255,255,0.02);
+}
+
+.doctor-form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.doctor-form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.doctor-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+}
+
+.doctor-form-submit {
+  padding: 0.75rem 2rem;
+  font-size: 0.9rem;
+}
+
+.doctor-form-error {
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #f87171;
+  padding: 0.85rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+/* =============================================
+   PENDING APPROVAL BANNER
+   ============================================= */
+
+.pending-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 16px;
+  padding: 1.75rem;
+  margin-bottom: 2rem;
+  animation: pending-pulse 3s ease-in-out infinite;
+}
+
+@keyframes pending-pulse {
+  0%, 100% { border-color: rgba(245,158,11,0.2); }
+  50% { border-color: rgba(245,158,11,0.4); }
+}
+
+.pending-banner-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.pending-banner-content {
+  flex: 1;
+}
+
+.pending-banner-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fbbf24;
+  margin: 0 0 0.5rem;
+}
+
+.pending-banner-text {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* =============================================
+   BLOCKED ACCESS BANNER
+   ============================================= */
+
+.blocked-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 16px;
+  padding: 1.75rem;
+  margin-bottom: 2rem;
+}
+
+.blocked-banner-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.blocked-banner-content {
+  flex: 1;
+}
+
+.blocked-banner-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f87171;
+  margin: 0 0 0.5rem;
+}
+
+.blocked-banner-text {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.blocked-banner-link {
+  color: #818cf8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.blocked-banner-link:hover {
+  text-decoration: underline;
+}
+
+/* =============================================
+   PROFILE SUMMARY (pending state display)
+   ============================================= */
+
+.profile-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.profile-summary-row {
+  display: flex;
+  align-items: center;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.profile-summary-row:last-child {
+  border-bottom: none;
+}
+
+.profile-summary-row:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+.profile-summary-label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #64748b;
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.profile-summary-value {
+  font-size: 0.9rem;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+/* =============================================
+   LOADING STATE
+   ============================================= */
+
+.doctor-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.doctor-loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255,255,255,0.08);
+  border-top-color: #818cf8;
+  border-radius: 50%;
+  animation: spinner-rotate 0.8s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}

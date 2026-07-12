@@ -59,7 +59,7 @@ const createDoctor = async (data, currentUser) => {
       profileImage: profileImage || null,
       availableDays: availableDays || [],
       consultationFee: consultationFee || 0.00,
-      status: status || 'active',
+      status: 'inactive',
       userId: currentUser.id
     });
 
@@ -167,10 +167,32 @@ const deleteDoctor = async (id) => {
   return doctor;
 };
 
+// Get doctor profile by userId
+const getDoctorByUserId = async (userId) => {
+  const doctor = await Doctor.findOne({ where: { userId } });
+  return doctor;
+};
+
+// Approve doctor (admin sets status to 'active')
+const approveDoctorService = async (doctorId) => {
+  const doctor = await Doctor.findByPk(doctorId);
+  if (!doctor) {
+    throw { status: 404, message: 'Doctor not found' };
+  }
+  if (doctor.status === 'active') {
+    throw { status: 400, message: 'Doctor is already approved' };
+  }
+  doctor.status = 'active';
+  await doctor.save();
+  return doctor.toJSON();
+};
+
 export {
     createDoctor,
     updateDoctor,
     getDoctorById,
     getAllDoctors,
-    deleteDoctor
+    deleteDoctor,
+    getDoctorByUserId,
+    approveDoctorService
 }
