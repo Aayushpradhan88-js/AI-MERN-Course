@@ -14,7 +14,7 @@ const IncomingPatients = () => {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('accessToken')
-      const res = await axios.get('http://localhost:5900/api/appointments', { 
+      const res = await axios.get('http://localhost:5900/api/receptionists/patientsrequests', { 
         headers: { Authorization: `Bearer ${token}` } 
       })
       
@@ -39,7 +39,7 @@ const IncomingPatients = () => {
     if (!newStatus) return
     try {
       const token = localStorage.getItem('accessToken')
-      await axios.put(`http://localhost:5900/api/appointments/${appointmentId}/status`, 
+      await axios.put(`http://localhost:5900/api/receptionists/patientsrequests/${appointmentId}/status`, 
         { status: newStatus }, 
         { headers: { Authorization: `Bearer ${token}` } }
       )

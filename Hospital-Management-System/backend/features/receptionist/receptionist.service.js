@@ -91,4 +91,14 @@ const createReceptionistService = async (data, currentUser) => {
   }
 };
 
+import { getAppointmentsService, updateAppointmentStatusService } from '../appointments/appointment.service.js';
+
+export const getAllAppointmentsRequestsService = async () => {
+  return await getAppointmentsService({ roles: 'admin' }); // Passing mock admin user to bypass patient check
+};
+
+export const updateAppointmentRequestStatusService = async (id, status) => {
+  return await updateAppointmentStatusService(id, status);
+};
+
 export default createReceptionistService;
