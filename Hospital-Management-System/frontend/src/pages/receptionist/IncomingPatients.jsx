@@ -4,6 +4,8 @@ import axios from 'axios'
 
 const IncomingPatients = () => {
   const [appointments, setAppointments] = useState([])
+  const [doctors, setDoctors] = useState([])
+  const [departments, setDepartments] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('All')
 
@@ -14,20 +16,26 @@ const IncomingPatients = () => {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('accessToken')
-      const res = await axios.get('http://localhost:5900/api/receptionists/patientsrequests', { 
-        headers: { Authorization: `Bearer ${token}` } 
-      })
       
-      const fetchedAppointments = res.data.data.appointments.map(a => ({
+      const [resApp, resDoc, resDep] = await Promise.all([
+        axios.get('http://localhost:5900/api/receptionists/patientsrequests', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('http://localhost:5900/api/doctors', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('http://localhost:5900/api/departments', { headers: { Authorization: `Bearer ${token}` } })
+      ])
+      
+      const fetchedAppointments = resApp.data.data.appointments.map(a => ({
         id: a.id,
         patientName: a.patientDetails ? `${a.patientDetails.firstName} ${a.patientDetails.lastName}` : 'Unknown',
         date: new Date(a.appointmentDate).toLocaleDateString(),
         time: new Date(a.appointmentDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-        doctor: a.doctorDetails ? `Dr. ${a.doctorDetails.lastName}` : 'Unknown',
+        doctorId: a.doctorId || '',
+        departmentName: a.departmentDetails ? a.departmentDetails.name : '',
         status: a.status
       }))
       
       setAppointments(fetchedAppointments)
+      setDoctors(resDoc.data)
+      setDepartments(resDep.data.data.departments)
       setLoading(false)
     } catch (error) {
       console.error(error)
@@ -35,18 +43,20 @@ const IncomingPatients = () => {
     }
   }
 
-  const handleUpdateStatus = async (appointmentId, newStatus) => {
-    if (!newStatus) return
+
+  const handleAssignDoctor = async (appointmentId, doctorId) => {
+    if (!doctorId) return
     try {
       const token = localStorage.getItem('accessToken')
-      await axios.put(`http://localhost:5900/api/receptionists/patientsrequests/${appointmentId}/status`, 
-        { status: newStatus }, 
+      await axios.put(`http://localhost:5900/api/receptionists/patientsrequests/${appointmentId}/assign`, 
+        { doctorId: Number(doctorId) }, 
         { headers: { Authorization: `Bearer ${token}` } }
       )
+      alert('Doctor assigned successfully!')
       fetchData() // Refresh list
     } catch (error) {
       console.error(error)
-      alert('Error updating status')
+      alert(error.response?.data?.message || 'Error assigning doctor')
     }
   }
 
@@ -86,50 +96,55 @@ const IncomingPatients = () => {
                   <th>Patient</th>
                   <th>Date</th>
                   <th>Time</th>
-                  <th>Doctor</th>
+                  <th>Department</th>
+                  <th>Assign Doctor</th>
                   <th>Status</th>
-                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan="6" style={{ textAlign: 'center' }}>Loading...</td></tr>
-                ) : filtered.map((row, i) => (
-                  <tr key={i}>
-                    <td>{row.patientName}</td>
-                    <td className="td-muted">{row.date}</td>
-                    <td className="td-muted">{row.time}</td>
-                    <td>{row.doctor}</td>
-                    <td>
-                      <span
-                        className={`status-badge ${
-                          row.status === 'completed'
-                            ? 'status-green'
-                            : row.status === 'confirmed'
-                            ? 'status-purple'
-                            : row.status === 'pending'
-                            ? 'status-yellow'
-                            : 'status-grey'
-                        }`}
-                      >
-                        {row.status}
-                      </span>
-                    </td>
-                    <td>
-                      <select 
-                        value={row.status}
-                        onChange={(e) => handleUpdateStatus(row.id, e.target.value)}
-                        className="auth-input" 
-                        style={{ padding: '0.35rem', background: '#13131f', color: '#fff', border: '1px solid #333' }}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    </td>
-                  </tr>
-                ))}
+                  <tr><td colSpan="7" style={{ textAlign: 'center' }}>Loading...</td></tr>
+                ) : filtered.map((row, i) => {
+                  const availableDocs = doctors.filter(doc => 
+                    doc.specialization && doc.specialization.toLowerCase() === row.departmentName.toLowerCase() && doc.status === 'active'
+                  );
+                  return (
+                    <tr key={i}>
+                      <td>{row.patientName}</td>
+                      <td className="td-muted">{row.date}</td>
+                      <td className="td-muted">{row.time}</td>
+                      <td className="td-muted">{row.departmentName || 'Unknown'}</td>
+                      <td>
+                        <select 
+                          value={row.doctorId || ''}
+                          onChange={(e) => handleAssignDoctor(row.id, e.target.value)}
+                          className="auth-input" 
+                          style={{ padding: '0.35rem', background: '#13131f', color: '#fff', border: '1px solid #333' }}
+                        >
+                          <option value="">Select Doctor</option>
+                          {availableDocs.map(doc => (
+                            <option key={doc.id} value={doc.id}>Dr. {doc.lastName}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge ${
+                            row.status === 'completed'
+                              ? 'status-green'
+                              : row.status === 'confirmed'
+                              ? 'status-purple'
+                              : row.status === 'pending'
+                              ? 'status-yellow'
+                              : 'status-grey'
+                          }`}
+                        >
+                          {row.status}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

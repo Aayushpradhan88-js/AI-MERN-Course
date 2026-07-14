@@ -101,4 +101,34 @@ export const updateAppointmentRequestStatusService = async (id, status) => {
   return await updateAppointmentStatusService(id, status);
 };
 
+import Appointment from '../appointments/appointment.model.js';
+import Doctor from '../doctor/doctor.model.js';
+import Department from '../deparments/department.model.js';
+
+export const assignDoctorToPatientRequestService = async (id, doctorId) => {
+  const appointment = await Appointment.findByPk(id);
+  if (!appointment) {
+    throw { status: 404, message: 'Appointment not found' };
+  }
+
+  const doctor = await Doctor.findByPk(doctorId);
+  if (!doctor) {
+    throw { status: 404, message: 'Doctor not found' };
+  }
+
+  const department = await Department.findByPk(appointment.departmentId);
+  if (!department) {
+    throw { status: 404, message: 'Department not found' };
+  }
+
+  if (doctor.specialization.toLowerCase() !== department.name.toLowerCase()) {
+    throw { status: 400, message: 'Doctor specialization does not match appointment department' };
+  }
+
+  appointment.doctorId = doctorId;
+  await appointment.save();
+
+  return appointment.toJSON();
+};
+
 export default createReceptionistService;

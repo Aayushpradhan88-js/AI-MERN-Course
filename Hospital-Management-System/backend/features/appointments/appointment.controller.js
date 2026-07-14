@@ -109,4 +109,25 @@ export const updateStatusController = async (req, res) => {
   }
 };
 
+import { markPatientNotifiedService } from './appointment.service.js';
+
+export const markNotifiedController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const updated = await markPatientNotifiedService(id);
+    return res.status(200).json({
+      success: true,
+      message: 'Patient notified status updated',
+      data: { appointment: updated },
+    });
+  } catch (error) {
+    console.error('Error in markNotifiedController:', error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Internal server error',
+    });
+  }
+};
+
 export default createAppointment;

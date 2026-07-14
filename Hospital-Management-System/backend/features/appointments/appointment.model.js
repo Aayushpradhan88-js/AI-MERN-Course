@@ -27,6 +27,11 @@ const Appointment = sequelize.define('Appointment', {
         type: DataTypes.ENUM('pending', 'confirmed', 'completed', 'cancelled'),
         defaultValue: 'pending'
     },
+    patientNotified: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    }
 }, {
     tableName: 'appointments',
     timestamps: true,

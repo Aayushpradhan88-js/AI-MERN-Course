@@ -93,6 +93,12 @@ export const getAppointmentsService = async (currentUser) => {
       return []; // No profile yet
     }
     filterWhere.patientId = patient.id;
+  } else if (currentUser.roles === 'doctor') {
+    const doctor = await Doctor.findOne({ where: { userId: currentUser.id } });
+    if (!doctor) {
+      return []; // No profile yet
+    }
+    filterWhere.doctorId = doctor.id;
   }
 
   options.where = filterWhere;
@@ -135,6 +141,18 @@ export const updateAppointmentStatusService = async (appointmentId, status) => {
   }
 
   appointment.status = status;
+  await appointment.save();
+
+  return appointment.toJSON();
+};
+
+export const markPatientNotifiedService = async (appointmentId) => {
+  const appointment = await Appointment.findByPk(appointmentId);
+  if (!appointment) {
+    throw { status: 404, message: 'Appointment not found' };
+  }
+
+  appointment.patientNotified = true;
   await appointment.save();
 
   return appointment.toJSON();

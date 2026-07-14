@@ -35,7 +35,7 @@ await connectionDB();
 
 app.use("/api/auth", authRouter);
 app.use("/api/doctors", doctorRouter);
-app.use("/api/patient", patientRouter);
+app.use("/api/patients", patientRouter);
 app.use('/api/departments', departmentRouter);
 app.use('/api/doctor-departments', doctorDepartmentRouter);
 app.use('/api/appointments', appointmentRouter);

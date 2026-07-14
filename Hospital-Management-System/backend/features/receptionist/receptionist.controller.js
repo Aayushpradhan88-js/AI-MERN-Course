@@ -136,3 +136,32 @@ export const updatePatientRequestStatus = async (req, res) => {
     });
   }
 };
+
+import { assignDoctorToPatientRequestService } from './receptionist.service.js';
+
+export const assignDoctor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { doctorId } = req.body;
+    
+    if (!doctorId) {
+      return res.status(400).json({
+        success: false,
+        message: 'doctorId is required',
+      });
+    }
+
+    const updated = await assignDoctorToPatientRequestService(id, doctorId);
+    return res.status(200).json({
+      success: true,
+      message: 'Doctor assigned successfully',
+      data: { appointment: updated },
+    });
+  } catch (error) {
+    console.error('Error in assignDoctor:', error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Internal server error',
+    });
+  }
+};
