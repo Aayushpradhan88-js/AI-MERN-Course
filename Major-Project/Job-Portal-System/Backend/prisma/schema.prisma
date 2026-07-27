@@ -13,7 +13,134 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum Role {
+  CANDIDATE
+  RECRUITER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+  DRAFT
+}
+
+enum ApplicationStatus {
+  PENDING
+  SHORTLISTED
+  REJECTED
+  ACCEPTED
+}
+
 model User {
-  id String @id @default(cuid())
-  email String
+  id       String     @id @default(cuid())
+  email    String     @unique
+  password String
+  role     Role
+  status   UserStatus @default(ACTIVE)
+
+  candidateProfile CandidateProfile?
+  recruiterProfile RecruiterProfile?
+  adminActions     AdminAction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model CandidateProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  fullname    String
+  phoneNumber String?
+  location    String?
+  resumeUrl   String?
+  skills      String[]
+  bio         String?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("candidate_profiles")
+}
+
+model RecruiterProfile {
+  id                 String  @id @default(cuid())
+  userId             String  @unique
+  companyName        String
+  companyWebsite     String?
+  companyDescription String?
+  designation        String?
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs Job[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("recruiter_profiles")
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  recruiterId String
+  title       String
+  description String
+  role        String
+  location    String
+  salaryMin   Int?
+  salaryMax   Int?
+  status      JobStatus @default(OPEN)
+  startDate   DateTime?
+  endDate     DateTime?
+
+  recruiter    RecruiterProfile @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("jobs")
+}
+
+model Application {
+  id          String            @id @default(cuid())
+  jobId       String
+  candidateId String
+  resumeUrl   String?
+  coverLetter String?
+  status      ApplicationStatus @default(PENDING)
+
+  job       Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidate CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([jobId, candidateId])
+  @@map("applications")
+}
+
+model AdminAction {
+  id       String  @id @default(cuid())
+  adminId  String
+  action   String
+  targetId String?
+  notes    String?
+
+  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("admin_actions")
 }
