@@ -3,6 +3,7 @@ import type { AuthSession, UserRole } from "./types";
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api";
 
 async function request<T>(path: string, body: Record<string, string>) {
+  
   const response = await fetch(`${API_URL}/auth${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
