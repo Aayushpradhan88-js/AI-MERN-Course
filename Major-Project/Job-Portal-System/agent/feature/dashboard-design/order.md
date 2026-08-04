@@ -1,0 +1,31 @@
+DESIGN_SYSTEM.md
+        │
+        ▼
+DashboardShell
+        │
+        ▼
+Sidebar
+        │
+        ▼
+Navbar
+        │
+        ▼
+DashboardContainer
+        │
+        ▼
+Breadcrumb
+        │
+        ▼
+StatCard
+        │
+        ▼
+ChartCard
+        │
+        ▼
+Table Components
+        │
+        ▼
+Widgets
+        │
+        ▼
+Candidate Dashboard

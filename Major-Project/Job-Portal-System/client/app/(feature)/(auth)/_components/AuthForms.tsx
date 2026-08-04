@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import AuthLayout from "@/components/AuthLayout";
+import { getDashboardPath } from "@/lib/routes";
 import { login, register } from "@/shared/auth/api";
 import { saveSession } from "@/shared/auth/session";
 
@@ -45,8 +46,9 @@ export function LoginForm() {
     setSubmitting(true);
     setError("");
     try {
-      saveSession(await login({ email: String(form.get("email")), password: String(form.get("password")) }));
-      router.replace("/dashboard");
+      const session = await login({ email: String(form.get("email")), password: String(form.get("password")) });
+      saveSession(session);
+      router.replace(getDashboardPath(session.user.role));
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Unable to log in.");
     } finally {
